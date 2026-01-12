@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Gardırop</title>
+    <link rel="stylesheet" href="static/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <!-- PWA capable basics -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#121212">
+</head>
+
+<body>
+
+    <!-- Landing Page: Gender Selection -->
+    <div id="landing-page">
+        <h1 style="font-size: 2rem; margin-bottom: 2rem;">Gardırop</h1>
+        <button class="gender-btn men" onclick="app.selectGender('men')">Erkek</button>
+        <button class="gender-btn women" onclick="app.selectGender('women')">Kadın</button>
+    </div>
+
+    <!-- Dashboard: Inventory View -->
+    <div id="dashboard" class="hidden">
+        <header>
+            <button class="back-btn" onclick="app.goBack()">← Geri</button>
+            <h1 id="page-title">Erkek</h1>
+            <div style="width: 24px;"></div> <!-- Spacer -->
+        </header>
+
+        <!-- Category Filter -->
+        <div class="categories" id="category-list">
+            <div class="cat-chip active" onclick="app.filterCategory('all', this)">Tümü</div>
+            <div class="cat-chip" onclick="app.filterCategory('Ust Giyim', this)">Üst Giyim</div>
+            <div class="cat-chip" onclick="app.filterCategory('Alt Giyim', this)">Alt Giyim</div>
+            <div class="cat-chip" onclick="app.filterCategory('Ayakkabi', this)">Ayakkabı</div>
+            <div class="cat-chip" onclick="app.filterCategory('Dis Giyim', this)">Dış Giyim</div>
+            <div class="cat-chip" onclick="app.filterCategory('Aksesuar', this)">Aksesuar</div>
+        </div>
+
+        <!-- Inventory Grid -->
+        <div class="inventory-grid" id="inventory-grid">
+            <!-- Items injected by JS -->
+        </div>
+
+        <!-- Floating Action Button -->
+        <button class="fab" onclick="app.openAddModal()">+</button>
+    </div>
+
+    <!-- Add Item Modal -->
+    <div id="add-modal" class="modal hidden">
+        <div class="modal-content">
+            <button class="btn-close" onclick="app.closeAddModal()">×</button>
+            <h2 style="margin-bottom: 1.5rem;">Yeni Kıyafet Ekle</h2>
+
+            <form id="add-form" onsubmit="app.submitItem(event)">
+                <div class="form-group">
+                    <label>Kategori</label>
+                    <select name="category" required>
+                        <option value="Ust Giyim">Üst Giyim</option>
+                        <option value="Alt Giyim">Alt Giyim</option>
+                        <option value="Ayakkabi">Ayakkabı</option>
+                        <option value="Dis Giyim">Dış Giyim</option>
+                        <option value="Aksesuar">Aksesuar</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Fotoğraf</label>
+                    <input type="file" name="image" accept="image/*" required onchange="app.previewImage(this)">
+                    <img id="image-preview" class="preview-image">
+                </div>
+
+                <button type="submit" class="btn-primary">Kaydet</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-storage-compat.js"></script>
+
+    <!-- Config & App -->
+    <script src="static/firebase-config.js"></script>
+    <script src="static/app.js"></script>
+</body>
+
+</html>
