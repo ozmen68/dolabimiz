@@ -6,13 +6,39 @@ const app = {
 
     init: () => {
         console.log('App initialized (Firebase)');
+        app.getWeather();
+    },
+
+    getWeather: async () => {
+        const widget = document.getElementById('weather-widget');
+        try {
+            // Default to Istanbul for simplicity if Geo fails or permissions denied
+            // Using Open-Meteo free API
+            const response = await fetch('https://api.open-meteos.com/v1/forecast?latitude=41.0082&longitude=28.9784&current_weather=true');
+            const data = await response.json();
+            const temp = Math.round(data.current_weather.temperature);
+
+            let icon = '☀️';
+            const code = data.current_weather.weathercode;
+            if (code > 3) icon = '☁️';
+            if (code > 50) icon = 'Vm^';
+            if (code > 70) icon = '❄️';
+
+            widget.innerHTML = `${icon} ${temp}°C <br><span style="font-size:0.7em">İstanbul</span>`;
+        } catch (e) {
+            console.error('Weather error:', e);
+            widget.innerHTML = '<span style="font-size:0.8rem">Hava alınamadı</span>';
+        }
     },
 
     selectGender: (gender) => {
         app.state.gender = gender;
         document.getElementById('landing-page').classList.add('hidden');
         document.getElementById('dashboard').classList.remove('hidden');
-        document.getElementById('page-title').innerText = gender === 'men' ? 'Erkek' : 'Kadın';
+
+        // Personalization
+        const name = gender === 'men' ? 'Mustafa' : 'Dudu';
+        document.getElementById('page-title').innerText = name + "'nın Dolabı";
 
         // Reset category and load items
         app.filterCategory('all', document.querySelector('.cat-chip'));
