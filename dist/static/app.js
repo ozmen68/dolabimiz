@@ -11,39 +11,51 @@ const app = {
 
     getWeather: async () => {
         const widget = document.getElementById('weather-widget');
-        widget.innerHTML = '<span style="font-size:0.7em">Konum alınıyor...</span>';
+        widget.innerHTML = '<span style="font-size:0.7em">Hava yükleniyor...</span>';
 
-        if (!navigator.geolocation) {
-            widget.innerHTML = '<span style="font-size:0.7em">Konum kapalı</span>';
-            return;
+        // Try geolocation first, but with timeout
+        if (navigator.geolocation) {
+            const timeoutId = setTimeout(() => {
+                // Fallback to Istanbul if permission takes too long
+                app.fetchWeatherForLocation(41.0082, 28.9784, 'İstanbul');
+            }, 3000);
+
+            navigator.geolocation.getCurrentPosition(
+                async (position) => {
+                    clearTimeout(timeoutId);
+                    app.fetchWeatherForLocation(position.coords.latitude, position.coords.longitude, 'Konumunuz');
+                },
+                (err) => {
+                    clearTimeout(timeoutId);
+                    console.error('Geolocation error:', err);
+                    app.fetchWeatherForLocation(41.0082, 28.9784, 'İstanbul');
+                }
+            );
+        } else {
+            app.fetchWeatherForLocation(41.0082, 28.9784, 'İstanbul');
         }
+    },
 
-        navigator.geolocation.getCurrentPosition(async (position) => {
-            try {
-                const lat = position.coords.latitude;
-                const lon = position.coords.longitude;
+    fetchWeatherForLocation: async (lat, lon, locationName) => {
+        const widget = document.getElementById('weather-widget');
+        try {
+            const response = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`);
+            const data = await response.json();
+            const temp = Math.round(data.current_weather.temperature);
 
-                const response = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`);
-                const data = await response.json();
-                const temp = Math.round(data.current_weather.temperature);
+            let icon = '☀️';
+            const code = data.current_weather.weathercode;
+            if (code > 3) icon = '☁️';
+            if (code > 45) icon = '🌫️';
+            if (code > 50) icon = '🌧️';
+            if (code > 70) icon = '❄️';
+            if (code > 95) icon = '⛈️';
 
-                let icon = '☀️';
-                const code = data.current_weather.weathercode;
-                if (code > 3) icon = '☁️';
-                if (code > 45) icon = '🌫️';
-                if (code > 50) icon = '🌧️';
-                if (code > 70) icon = '❄️';
-                if (code > 95) icon = '⛈️';
-
-                widget.innerHTML = `${icon} ${temp}°C`;
-            } catch (e) {
-                console.error('Weather error:', e);
-                widget.innerHTML = '<span style="font-size:0.8rem">Hava alınamadı</span>';
-            }
-        }, (err) => {
-            console.error(err);
-            widget.innerHTML = '<span style="font-size:0.7em">Konum izni yok</span>';
-        });
+            widget.innerHTML = `${icon} ${temp}°C`;
+        } catch (e) {
+            console.error('Weather error:', e);
+            widget.innerHTML = '<span style="font-size:0.7em">--°C</span>';
+        }
     },
 
     selectGender: (gender) => {
@@ -227,6 +239,75 @@ const app = {
             btn.innerText = originalText;
             btn.disabled = false;
         }
+    },
+
+    /* Outfit Creator */
+    openOutfitModal: () => {
+        document.getElementById('outfit-modal').classList.remove('hidden');
+    },
+
+    closeOutfitModal: () => {
+        document.getElementById('outfit-modal').classList.add('hidden');
+    },
+
+    currentSlot: null,
+
+    selectOutfitItem: (category, slotId) => {
+        app.currentSlot = slotId;
+        document.getElementById('selector-modal').classList.remove('hidden');
+        app.fetchSelectorItems(category);
+    },
+
+    fetchSelectorItems: async (category) => {
+        const grid = document.getElementById('selector-grid');
+        grid.innerHTML = '<div class="flex-center">Yükleniyor...</div>';
+
+        try {
+            let query = db.collection('items')
+                .where('gender', '==', app.state.gender)
+                .where('category', '==', category)
+                .orderBy('created_at', 'desc');
+
+            const snapshot = await query.get();
+            grid.innerHTML = '';
+
+            if (snapshot.empty) {
+                grid.innerHTML = '<div class="flex-center">Bu kategoride kıyafet yok.</div>';
+                return;
+            }
+
+            snapshot.forEach(doc => {
+                const item = doc.data();
+                const img = document.createElement('img');
+                img.src = item.imageUrl;
+                img.style.cssText = "width:100px; height:100px; object-fit:cover; margin:5px; cursor:pointer; border-radius:10px; border:2px solid transparent;";
+
+                img.onclick = () => {
+                    app.setOutfitSlot(item.imageUrl);
+                };
+
+                grid.appendChild(img);
+            });
+        } catch (error) {
+            console.error(error);
+            grid.innerHTML = 'Hata: ' + error.message;
+        }
+    },
+
+    setOutfitSlot: (url) => {
+        const slotImg = document.getElementById(app.currentSlot + '-img');
+        if (slotImg) {
+            slotImg.src = url;
+            slotImg.classList.remove('hidden');
+        }
+        document.getElementById('selector-modal').classList.add('hidden');
+    },
+
+    resetOutfit: () => {
+        document.querySelectorAll('.outfit-slot img').forEach(img => {
+            img.src = '';
+            img.classList.add('hidden');
+        });
     }
 };
 
