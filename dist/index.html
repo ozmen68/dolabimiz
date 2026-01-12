@@ -17,16 +17,21 @@
     <!-- Landing Page: Gender Selection -->
     <div id="landing-page">
         <h1 style="font-size: 2rem; margin-bottom: 2rem;">Gardırop</h1>
-        <button class="gender-btn men" onclick="app.selectGender('men')">Erkek</button>
-        <button class="gender-btn women" onclick="app.selectGender('women')">Kadın</button>
+        <button class="gender-btn men" onclick="app.selectGender('men')">Mustafa'nın Dolabı</button>
+        <button class="gender-btn women" onclick="app.selectGender('women')">Dudu'nun Dolabı</button>
     </div>
 
     <!-- Dashboard: Inventory View -->
     <div id="dashboard" class="hidden">
         <header>
-            <button class="back-btn" onclick="app.goBack()">← Geri</button>
-            <h1 id="page-title">Erkek</h1>
-            <div style="width: 24px;"></div> <!-- Spacer -->
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <button class="back-btn" onclick="app.goBack()">←</button>
+                <h1 id="page-title">Dolap</h1>
+            </div>
+            <div id="weather-widget" class="weather-widget">
+                <!-- Weather JS will inject here -->
+                <span style="font-size: 0.8rem;">Hava Durumu...</span>
+            </div>
         </header>
 
         <!-- Category Filter -->
@@ -45,7 +50,48 @@
         </div>
 
         <!-- Floating Action Button -->
-        <button class="fab" onclick="app.openAddModal()">+</button>
+        <!-- Floating Action Button Group -->
+        <div class="fab-container">
+            <button class="fab secondary" onclick="app.openOutfitModal()" title="Kombin Yap">👕</button>
+            <button class="fab" onclick="app.openAddModal()">+</button>
+        </div>
+    </div>
+
+    <!-- Outfit Creator Modal -->
+    <div id="outfit-modal" class="modal hidden">
+        <div class="modal-content" style="height: 90vh; display: flex; flex-direction: column;">
+            <button class="btn-close" onclick="app.closeOutfitModal()">×</button>
+            <h2>Kombin Yap</h2>
+
+            <div class="outfit-canvas" id="outfit-canvas">
+                <div class="outfit-slot top" onclick="app.selectOutfitItem('Ust Giyim', 'top-slot')">
+                    <span>Üst Seç</span>
+                    <img id="top-slot-img" class="hidden">
+                </div>
+                <div class="outfit-slot bottom" onclick="app.selectOutfitItem('Alt Giyim', 'bottom-slot')">
+                    <span>Alt Seç</span>
+                    <img id="bottom-slot-img" class="hidden">
+                </div>
+                <div class="outfit-slot shoes" onclick="app.selectOutfitItem('Ayakkabi', 'shoes-slot')">
+                    <span>Ayakkabı Seç</span>
+                    <img id="shoes-slot-img" class="hidden">
+                </div>
+            </div>
+
+            <button onclick="app.resetOutfit()" class="btn-secondary" style="margin-top: auto;">Temizle</button>
+        </div>
+    </div>
+
+    <!-- Item Selector Modal (For Outfit) -->
+    <div id="selector-modal" class="modal hidden" style="z-index: 200;">
+        <div class="modal-content">
+            <button class="btn-close"
+                onclick="document.getElementById('selector-modal').classList.add('hidden')">×</button>
+            <h3>Kıyafet Seç</h3>
+            <div class="inventory-grid" id="selector-grid" style="height: 400px; overflow-y: auto;">
+                <!-- Items injected here -->
+            </div>
+        </div>
     </div>
 
     <!-- Add Item Modal -->
