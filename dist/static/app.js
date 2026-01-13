@@ -66,22 +66,13 @@ const app = {
         const name = gender === 'men' ? 'Mustafa' : 'Dudu';
         document.getElementById('page-title').innerText = name + "'nın Dolabı";
 
-        // Apply Theme
-        if (gender === 'women') {
-            document.body.classList.add('theme-women');
-        } else {
-            document.body.classList.remove('theme-women');
-        }
-
         app.filterCategory('all', document.querySelector('.cat-chip'));
     },
-
 
     goBack: () => {
         document.getElementById('dashboard').classList.add('hidden');
         document.getElementById('landing-page').classList.remove('hidden');
         app.state.gender = null;
-        document.body.classList.remove('theme-women');
     },
 
     filterCategory: (category, element) => {
